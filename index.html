@@ -23,7 +23,6 @@
     }
 
     * { box-sizing: border-box; }
-
     html { scroll-behavior: smooth; }
 
     body {
@@ -92,7 +91,6 @@
       font-size: .92rem;
     }
 
-    .print-button,
     .reset-button {
       border: 0;
       border-radius: 10px;
@@ -100,18 +98,6 @@
       font-weight: 750;
       transition: transform .18s ease, background .18s ease, box-shadow .18s ease;
     }
-
-    .print-button {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 11px 15px;
-      color: #fff;
-      background: var(--orange);
-      box-shadow: 0 8px 18px rgba(241, 90, 36, .18);
-    }
-
-    .print-button:hover { transform: translateY(-2px); }
 
     .hero {
       display: grid;
@@ -481,18 +467,10 @@
       font-size: .68rem;
     }
 
-    .summary-actions {
-      display: flex;
-      gap: 9px;
-      padding: 18px 25px 24px;
-    }
-
-    .summary-actions .print-button {
-      justify-content: center;
-      flex: 1;
-    }
+    .summary-actions { padding: 18px 25px 24px; }
 
     .reset-button {
+      width: 100%;
       padding: 10px 13px;
       color: var(--blue-dark);
       background: #edf3f6;
@@ -551,24 +529,28 @@
       .page-shell { width: min(100% - 24px, 1180px); padding-top: 16px; }
       .topbar { align-items: flex-start; }
       .proposal-meta > div { display: none; }
-      .topbar .print-button span { display: none; }
       .hero { padding-top: 40px; }
       .panel-heading { align-items: flex-start; padding: 22px 18px 17px; }
       .services { padding: 6px 10px 14px; }
+
       .service-card {
         grid-template-columns: 43px minmax(0, 1fr) 40px;
         gap: 12px;
         padding: 15px 10px;
       }
+
       .service-icon { width: 43px; height: 43px; }
+
       .service-price {
         grid-column: 2 / -1;
         grid-row: 2;
         min-width: 0;
         text-align: left;
       }
+
       .service-price strong,
       .service-price span { display: inline; }
+
       .service-price span::before { content: " · "; }
       .toggle { grid-column: 3; grid-row: 1; }
       .terms { grid-template-columns: 1fr; }
@@ -577,14 +559,16 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition: none !important;
+      }
     }
 
     @media print {
       @page { margin: 12mm; }
       body { background: #fff; }
       .page-shell { width: 100%; padding: 0; }
-      .topbar .print-button,
       .summary-actions,
       .selected-count { display: none !important; }
       .hero { padding: 30px 0; }
@@ -627,10 +611,6 @@
           Propuesta personalizada
           <strong id="proposalDate">—</strong>
         </div>
-        <button class="print-button" type="button" data-action="print" aria-label="Imprimir o guardar en PDF">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
-          <span>Guardar en PDF</span>
-        </button>
       </div>
     </header>
 
@@ -657,12 +637,10 @@
           <div class="selected-count" id="selectedCount">1 seleccionado</div>
         </div>
 
-        <div class="services" id="services">
+        <div class="services">
           <label class="service-card active" data-name="Asistente de WhatsApp + CRM">
             <input type="checkbox" name="service" data-setup="494" data-monthly="297" checked>
-            <span class="service-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 19H5l1.4-3.2A8 8 0 1 1 8 19Z"/><path d="M9 8.5c.5 2.3 2.1 3.8 4.5 4.5l1.2-1.2c.2-.2.5-.2.7-.1l2 .9v2c0 .5-.4.9-.9.9A9 9 0 0 1 8.5 7.5c0-.5.4-.9.9-.9h2l.9 2c.1.2.1.5-.1.7L11 10.5"/></svg>
-            </span>
+            <span class="service-icon" aria-hidden="true">💬</span>
             <span class="service-info">
               <strong>Asistente de WhatsApp + CRM</strong>
               <span>Atención inmediata, captación de datos y seguimiento comercial centralizado.</span>
@@ -676,9 +654,7 @@
 
           <label class="service-card" data-name="Asistente de llamadas">
             <input type="checkbox" name="service" data-setup="389" data-monthly="67">
-            <span class="service-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6.6 10.8a15.5 15.5 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.24 11.5 11.5 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.46.57 3.6a1 1 0 0 1-.25 1Z"/><path d="M15 3a6 6 0 0 1 6 6M15 7a2 2 0 0 1 2 2"/></svg>
-            </span>
+            <span class="service-icon" aria-hidden="true">☎</span>
             <span class="service-info">
               <strong>Asistente de llamadas</strong>
               <span>Atiende consultas, filtra necesidades y deriva cada oportunidad correctamente.</span>
@@ -692,9 +668,7 @@
 
           <label class="service-card" data-name="Automatización de correos">
             <input type="checkbox" name="service" data-setup="209" data-monthly="49">
-            <span class="service-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6M16 3l1 2 2 1-2 1-1 2-1-2-2-1 2-1Z"/></svg>
-            </span>
+            <span class="service-icon" aria-hidden="true">✉</span>
             <span class="service-info">
               <strong>Automatización de correos</strong>
               <span>Respuestas, avisos y seguimientos automáticos conectados con el proceso comercial.</span>
@@ -708,9 +682,7 @@
 
           <label class="service-card" data-name="Calendario automático">
             <input type="checkbox" name="service" data-setup="0" data-monthly="0">
-            <span class="service-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18m-12 5 2 2 4-5"/></svg>
-            </span>
+            <span class="service-icon" aria-hidden="true">▣</span>
             <span class="service-info">
               <strong>Calendario automático</strong>
               <span>Coordinación de citas integrada con las automatizaciones seleccionadas.</span>
@@ -724,9 +696,7 @@
 
           <label class="service-card" data-name="Página web conectada">
             <input type="checkbox" name="service" data-setup="249" data-monthly="186">
-            <span class="service-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="4" width="19" height="15" rx="2"/><path d="M2.5 8h19M7 21h10M12 19v2"/></svg>
-            </span>
+            <span class="service-icon" aria-hidden="true">▤</span>
             <span class="service-info">
               <strong>Página web conectada</strong>
               <span>Una web comercial preparada para captar, responder y convertir oportunidades.</span>
@@ -778,13 +748,12 @@
         </div>
 
         <div class="summary-actions">
-          <button class="print-button" type="button" data-action="print">Guardar en PDF</button>
-          <button class="reset-button" type="button" id="resetButton" aria-label="Restablecer selección">Restablecer</button>
+          <button class="reset-button" type="button" id="resetButton">Restablecer</button>
         </div>
       </aside>
     </section>
 
-    <section class="terms" aria-label="Condiciones del presupuesto">
+    <section class="terms">
       <div class="term">
         <strong>Importes transparentes</strong>
         <span>La implementación se abona una sola vez. La mensualidad corresponde a los servicios activos.</span>
@@ -855,18 +824,23 @@
       inputs.forEach(input => input.addEventListener('change', updateBudget));
 
       resetButton.addEventListener('click', () => {
-        inputs.forEach((input, index) => { input.checked = index === 0; });
+        inputs.forEach((input, index) => {
+          input.checked = index === 0;
+        });
+
         updateBudget();
-        document.querySelector('.panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document.querySelector('.panel').scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
       });
 
-      document.querySelectorAll('[data-action="print"]').forEach(button => {
-        button.addEventListener('click', () => window.print());
-      });
-
-      document.getElementById('proposalDate').textContent = new Intl.DateTimeFormat('es-ES', {
-        day: '2-digit', month: 'long', year: 'numeric'
-      }).format(new Date());
+      document.getElementById('proposalDate').textContent =
+        new Intl.DateTimeFormat('es-ES', {
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric'
+        }).format(new Date());
 
       updateBudget();
     })();
