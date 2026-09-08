@@ -1,0 +1,875 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Presupuesto interactivo de automatización para Climatron.">
+  <title>Propuesta de automatización · Climatron</title>
+  <style>
+    :root {
+      --blue: #0878bd;
+      --blue-dark: #073d5d;
+      --blue-soft: #eaf6fc;
+      --orange: #f15a24;
+      --orange-soft: #fff1eb;
+      --ink: #14202a;
+      --muted: #60717e;
+      --line: #dce5ea;
+      --paper: #ffffff;
+      --canvas: #f3f7f9;
+      --success: #087f5b;
+      --shadow: 0 18px 50px rgba(17, 45, 62, .10);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, #fff 0, #fff 250px, var(--canvas) 250px, var(--canvas) 100%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, input { font: inherit; }
+
+    button:focus-visible,
+    input:focus-visible + .toggle,
+    .service-card:has(input:focus-visible) {
+      outline: 3px solid rgba(8, 120, 189, .28);
+      outline-offset: 3px;
+    }
+
+    .page-shell {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 28px 0 56px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 28px;
+      min-height: 66px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 46px;
+      height: 46px;
+      flex: 0 0 auto;
+    }
+
+    .brand-name {
+      font-size: clamp(1.2rem, 2vw, 1.55rem);
+      font-weight: 800;
+      letter-spacing: .055em;
+    }
+
+    .proposal-meta {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      color: var(--muted);
+      font-size: .85rem;
+    }
+
+    .proposal-meta strong {
+      display: block;
+      margin-top: 2px;
+      color: var(--ink);
+      font-size: .92rem;
+    }
+
+    .print-button,
+    .reset-button {
+      border: 0;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 750;
+      transition: transform .18s ease, background .18s ease, box-shadow .18s ease;
+    }
+
+    .print-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 15px;
+      color: #fff;
+      background: var(--orange);
+      box-shadow: 0 8px 18px rgba(241, 90, 36, .18);
+    }
+
+    .print-button:hover { transform: translateY(-2px); }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(260px, .5fr);
+      gap: 34px;
+      align-items: end;
+      padding: 64px 0 54px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin: 0 0 17px;
+      color: var(--blue);
+      font-size: .78rem;
+      font-weight: 850;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 30px;
+      height: 3px;
+      border-radius: 5px;
+      background: var(--orange);
+    }
+
+    h1 {
+      max-width: 760px;
+      margin: 0;
+      color: var(--blue-dark);
+      font-size: clamp(2.25rem, 5vw, 4.7rem);
+      line-height: .98;
+      letter-spacing: -.055em;
+    }
+
+    .hero-copy {
+      max-width: 680px;
+      margin: 24px 0 0;
+      color: var(--muted);
+      font-size: clamp(1rem, 1.5vw, 1.16rem);
+      line-height: 1.65;
+    }
+
+    .client-block {
+      padding: 20px 0 4px 24px;
+      border-left: 1px solid var(--line);
+    }
+
+    .client-block span {
+      color: var(--muted);
+      font-size: .75rem;
+      font-weight: 800;
+      letter-spacing: .11em;
+      text-transform: uppercase;
+    }
+
+    .client-block strong {
+      display: block;
+      margin: 8px 0 3px;
+      font-size: 1.25rem;
+    }
+
+    .client-block a {
+      color: var(--blue);
+      font-size: .92rem;
+      text-decoration: none;
+    }
+
+    .configurator {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 370px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .panel,
+    .summary {
+      background: var(--paper);
+      border: 1px solid rgba(7, 61, 93, .08);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .panel { overflow: hidden; }
+
+    .panel-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 26px 28px 20px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-heading h2,
+    .summary h2 {
+      margin: 0;
+      color: var(--blue-dark);
+      font-size: 1.25rem;
+      letter-spacing: -.02em;
+    }
+
+    .panel-heading p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    .selected-count {
+      flex: 0 0 auto;
+      padding: 7px 10px;
+      color: var(--blue);
+      background: var(--blue-soft);
+      border-radius: 999px;
+      font-size: .78rem;
+      font-weight: 800;
+    }
+
+    .services { padding: 8px 18px 20px; }
+
+    .service-card {
+      position: relative;
+      display: grid;
+      grid-template-columns: 48px minmax(0, 1fr) auto 44px;
+      gap: 16px;
+      align-items: center;
+      margin-top: 10px;
+      padding: 18px 16px;
+      border: 1px solid transparent;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: background .2s ease, border-color .2s ease, transform .2s ease;
+    }
+
+    .service-card:hover {
+      background: #f9fbfc;
+      transform: translateY(-1px);
+    }
+
+    .service-card.active {
+      background: var(--blue-soft);
+      border-color: rgba(8, 120, 189, .20);
+    }
+
+    .service-card input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .service-icon {
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      color: var(--blue);
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+    }
+
+    .service-icon svg { width: 23px; height: 23px; }
+
+    .service-info strong {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--ink);
+      font-size: 1rem;
+    }
+
+    .service-info span {
+      display: block;
+      color: var(--muted);
+      font-size: .84rem;
+      line-height: 1.45;
+    }
+
+    .included-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 9px;
+    }
+
+    .included-list em {
+      padding: 4px 7px;
+      color: #76523f;
+      background: var(--orange-soft);
+      border-radius: 6px;
+      font-size: .69rem;
+      font-style: normal;
+      font-weight: 750;
+    }
+
+    .service-price {
+      min-width: 118px;
+      text-align: right;
+    }
+
+    .service-price strong,
+    .service-price span { display: block; }
+
+    .service-price strong {
+      color: var(--blue-dark);
+      font-size: .92rem;
+    }
+
+    .service-price span {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: .76rem;
+    }
+
+    .free { color: var(--success) !important; }
+
+    .toggle {
+      position: relative;
+      width: 44px;
+      height: 25px;
+      background: #cbd6dc;
+      border-radius: 999px;
+      transition: background .2s ease;
+    }
+
+    .toggle::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 19px;
+      height: 19px;
+      background: #fff;
+      border-radius: 50%;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, .18);
+      transition: transform .2s ease;
+    }
+
+    input:checked ~ .toggle { background: var(--blue); }
+    input:checked ~ .toggle::after { transform: translateX(19px); }
+
+    .summary {
+      position: sticky;
+      top: 20px;
+      overflow: hidden;
+    }
+
+    .summary-top {
+      padding: 25px 25px 22px;
+      color: #fff;
+      background: var(--blue-dark);
+    }
+
+    .summary-top h2 { color: #fff; }
+
+    .summary-top p {
+      margin: 6px 0 0;
+      color: rgba(255, 255, 255, .68);
+      font-size: .85rem;
+    }
+
+    .totals { padding: 14px 25px 9px; }
+
+    .total-row {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 18px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .total-row span {
+      color: var(--muted);
+      font-size: .86rem;
+    }
+
+    .total-row strong {
+      color: var(--blue-dark);
+      font-size: 1.62rem;
+      line-height: 1;
+      letter-spacing: -.045em;
+      white-space: nowrap;
+    }
+
+    .total-row strong small {
+      color: var(--muted);
+      font-size: .68rem;
+      font-weight: 650;
+      letter-spacing: 0;
+    }
+
+    .selected-summary {
+      min-height: 86px;
+      padding: 12px 25px 19px;
+    }
+
+    .selected-summary ul {
+      display: grid;
+      gap: 9px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .selected-summary li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: .8rem;
+    }
+
+    .selected-summary li::before {
+      content: "✓";
+      display: grid;
+      place-items: center;
+      width: 17px;
+      height: 17px;
+      flex: 0 0 auto;
+      color: #fff;
+      background: var(--success);
+      border-radius: 50%;
+      font-size: .65rem;
+      font-weight: 900;
+    }
+
+    .empty-state {
+      color: var(--muted);
+      font-size: .82rem;
+      font-style: italic;
+    }
+
+    .first-payment {
+      margin: 0 25px;
+      padding: 17px 18px;
+      background: var(--orange-soft);
+      border-radius: 12px;
+    }
+
+    .first-payment div {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .first-payment span {
+      color: #76523f;
+      font-size: .78rem;
+      font-weight: 700;
+    }
+
+    .first-payment strong {
+      color: var(--orange);
+      font-size: 1.35rem;
+    }
+
+    .first-payment small {
+      display: block;
+      margin-top: 5px;
+      color: #987665;
+      font-size: .68rem;
+    }
+
+    .summary-actions {
+      display: flex;
+      gap: 9px;
+      padding: 18px 25px 24px;
+    }
+
+    .summary-actions .print-button {
+      justify-content: center;
+      flex: 1;
+    }
+
+    .reset-button {
+      padding: 10px 13px;
+      color: var(--blue-dark);
+      background: #edf3f6;
+    }
+
+    .reset-button:hover { background: #e3edf1; }
+
+    .terms {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      margin-top: 26px;
+      overflow: hidden;
+      background: var(--line);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+    }
+
+    .term {
+      padding: 19px 22px;
+      background: #fff;
+    }
+
+    .term strong {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--blue-dark);
+      font-size: .84rem;
+    }
+
+    .term span {
+      color: var(--muted);
+      font-size: .76rem;
+      line-height: 1.45;
+    }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      margin-top: 28px;
+      color: var(--muted);
+      font-size: .75rem;
+    }
+
+    footer strong { color: var(--blue-dark); }
+
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; padding: 48px 0 40px; }
+      .client-block { padding: 0; border-left: 0; }
+      .configurator { grid-template-columns: 1fr; }
+      .summary { position: static; }
+    }
+
+    @media (max-width: 660px) {
+      .page-shell { width: min(100% - 24px, 1180px); padding-top: 16px; }
+      .topbar { align-items: flex-start; }
+      .proposal-meta > div { display: none; }
+      .topbar .print-button span { display: none; }
+      .hero { padding-top: 40px; }
+      .panel-heading { align-items: flex-start; padding: 22px 18px 17px; }
+      .services { padding: 6px 10px 14px; }
+      .service-card {
+        grid-template-columns: 43px minmax(0, 1fr) 40px;
+        gap: 12px;
+        padding: 15px 10px;
+      }
+      .service-icon { width: 43px; height: 43px; }
+      .service-price {
+        grid-column: 2 / -1;
+        grid-row: 2;
+        min-width: 0;
+        text-align: left;
+      }
+      .service-price strong,
+      .service-price span { display: inline; }
+      .service-price span::before { content: " · "; }
+      .toggle { grid-column: 3; grid-row: 1; }
+      .terms { grid-template-columns: 1fr; }
+      footer { display: block; }
+      footer span { display: block; margin-top: 7px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+    }
+
+    @media print {
+      @page { margin: 12mm; }
+      body { background: #fff; }
+      .page-shell { width: 100%; padding: 0; }
+      .topbar .print-button,
+      .summary-actions,
+      .selected-count { display: none !important; }
+      .hero { padding: 30px 0; }
+      h1 { font-size: 3rem; }
+      .configurator { grid-template-columns: 1.25fr .75fr; gap: 14px; }
+      .panel, .summary { box-shadow: none; break-inside: avoid; }
+      .summary { position: static; }
+      .service-card { padding: 11px 12px; margin-top: 4px; }
+      .service-card:not(.active) { display: none; }
+      .toggle { display: none; }
+      .service-card { grid-template-columns: 40px minmax(0, 1fr) auto; }
+      .service-icon { width: 40px; height: 40px; }
+      .terms { margin-top: 14px; }
+      footer { margin-top: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page-shell">
+    <header class="topbar">
+      <div class="brand" aria-label="Climatron">
+        <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+          <defs>
+            <linearGradient id="markGradient" x1="0" y1="1" x2="1" y2="0">
+              <stop offset="0" stop-color="#0878bd"/>
+              <stop offset=".53" stop-color="#26a5d9"/>
+              <stop offset=".54" stop-color="#f7a42b"/>
+              <stop offset="1" stop-color="#f15a24"/>
+            </linearGradient>
+          </defs>
+          <circle cx="32" cy="32" r="29" fill="url(#markGradient)"/>
+          <path d="M32 7v15m0 20v15M7 32h15m20 0h15M15 15l11 11m12 12 11 11M49 15 38 26M26 38 15 49" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="32" cy="32" r="8" fill="#fff"/>
+        </svg>
+        <div class="brand-name">CLIMATRON</div>
+      </div>
+
+      <div class="proposal-meta">
+        <div>
+          Propuesta personalizada
+          <strong id="proposalDate">—</strong>
+        </div>
+        <button class="print-button" type="button" data-action="print" aria-label="Imprimir o guardar en PDF">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+          <span>Guardar en PDF</span>
+        </button>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div>
+        <p class="eyebrow">Propuesta de automatización</p>
+        <h1>Más atención.<br>Menos tareas manuales.</h1>
+        <p class="hero-copy">Selecciona las soluciones que mejor encajan con Climatron. El presupuesto se recalcula al instante para que puedas comparar cada escenario con total transparencia.</p>
+      </div>
+      <div class="client-block">
+        <span>Preparado para</span>
+        <strong>Climatron</strong>
+        <a href="https://climatron.net/" target="_blank" rel="noopener noreferrer">climatron.net ↗</a>
+      </div>
+    </section>
+
+    <section class="configurator" aria-label="Configurador del presupuesto">
+      <div class="panel">
+        <div class="panel-heading">
+          <div>
+            <h2>Elige los servicios</h2>
+            <p>Puedes añadirlos o quitarlos en cualquier momento.</p>
+          </div>
+          <div class="selected-count" id="selectedCount">1 seleccionado</div>
+        </div>
+
+        <div class="services" id="services">
+          <label class="service-card active" data-name="Asistente de WhatsApp + CRM">
+            <input type="checkbox" name="service" data-setup="494" data-monthly="297" checked>
+            <span class="service-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 19H5l1.4-3.2A8 8 0 1 1 8 19Z"/><path d="M9 8.5c.5 2.3 2.1 3.8 4.5 4.5l1.2-1.2c.2-.2.5-.2.7-.1l2 .9v2c0 .5-.4.9-.9.9A9 9 0 0 1 8.5 7.5c0-.5.4-.9.9-.9h2l.9 2c.1.2.1.5-.1.7L11 10.5"/></svg>
+            </span>
+            <span class="service-info">
+              <strong>Asistente de WhatsApp + CRM</strong>
+              <span>Atención inmediata, captación de datos y seguimiento comercial centralizado.</span>
+            </span>
+            <span class="service-price">
+              <strong>494 € implantación</strong>
+              <span>297 €/mes</span>
+            </span>
+            <span class="toggle" aria-hidden="true"></span>
+          </label>
+
+          <label class="service-card" data-name="Asistente de llamadas">
+            <input type="checkbox" name="service" data-setup="389" data-monthly="67">
+            <span class="service-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6.6 10.8a15.5 15.5 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.24 11.5 11.5 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.46.57 3.6a1 1 0 0 1-.25 1Z"/><path d="M15 3a6 6 0 0 1 6 6M15 7a2 2 0 0 1 2 2"/></svg>
+            </span>
+            <span class="service-info">
+              <strong>Asistente de llamadas</strong>
+              <span>Atiende consultas, filtra necesidades y deriva cada oportunidad correctamente.</span>
+            </span>
+            <span class="service-price">
+              <strong>389 € implantación</strong>
+              <span>67 €/mes</span>
+            </span>
+            <span class="toggle" aria-hidden="true"></span>
+          </label>
+
+          <label class="service-card" data-name="Automatización de correos">
+            <input type="checkbox" name="service" data-setup="209" data-monthly="49">
+            <span class="service-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6M16 3l1 2 2 1-2 1-1 2-1-2-2-1 2-1Z"/></svg>
+            </span>
+            <span class="service-info">
+              <strong>Automatización de correos</strong>
+              <span>Respuestas, avisos y seguimientos automáticos conectados con el proceso comercial.</span>
+            </span>
+            <span class="service-price">
+              <strong>209 € implantación</strong>
+              <span>49 €/mes</span>
+            </span>
+            <span class="toggle" aria-hidden="true"></span>
+          </label>
+
+          <label class="service-card" data-name="Calendario automático">
+            <input type="checkbox" name="service" data-setup="0" data-monthly="0">
+            <span class="service-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18m-12 5 2 2 4-5"/></svg>
+            </span>
+            <span class="service-info">
+              <strong>Calendario automático</strong>
+              <span>Coordinación de citas integrada con las automatizaciones seleccionadas.</span>
+            </span>
+            <span class="service-price">
+              <strong class="free">Incluido gratis</strong>
+              <span>0 €/mes</span>
+            </span>
+            <span class="toggle" aria-hidden="true"></span>
+          </label>
+
+          <label class="service-card" data-name="Página web conectada">
+            <input type="checkbox" name="service" data-setup="249" data-monthly="186">
+            <span class="service-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="4" width="19" height="15" rx="2"/><path d="M2.5 8h19M7 21h10M12 19v2"/></svg>
+            </span>
+            <span class="service-info">
+              <strong>Página web conectada</strong>
+              <span>Una web comercial preparada para captar, responder y convertir oportunidades.</span>
+              <span class="included-list">
+                <em>Sesión de fotos</em>
+                <em>Conexión con CRM</em>
+                <em>Automatización de correos</em>
+                <em>Integraciones</em>
+              </span>
+            </span>
+            <span class="service-price">
+              <strong>249 € implantación</strong>
+              <span>186 €/mes</span>
+            </span>
+            <span class="toggle" aria-hidden="true"></span>
+          </label>
+        </div>
+      </div>
+
+      <aside class="summary" aria-label="Resumen del presupuesto">
+        <div class="summary-top">
+          <h2>Tu inversión</h2>
+          <p>Totales actualizados en tiempo real</p>
+        </div>
+
+        <div class="totals" aria-live="polite">
+          <div class="total-row">
+            <span>Implementación</span>
+            <strong id="setupTotal">494 €</strong>
+          </div>
+          <div class="total-row">
+            <span>Mensualidad</span>
+            <strong id="monthlyTotal">297 € <small>/ mes</small></strong>
+          </div>
+        </div>
+
+        <div class="selected-summary" id="selectedSummary"></div>
+
+        <div class="first-payment" aria-live="polite">
+          <div>
+            <span>Primer pago</span>
+            <strong id="firstPayment">791 €</strong>
+          </div>
+          <small>Implementación + primera mensualidad</small>
+          <div style="margin-top: 13px; padding-top: 12px; border-top: 1px solid rgba(241,90,36,.18)">
+            <span>Inversión primer año</span>
+            <strong id="annualTotal" style="font-size: 1rem">4.058 €</strong>
+          </div>
+        </div>
+
+        <div class="summary-actions">
+          <button class="print-button" type="button" data-action="print">Guardar en PDF</button>
+          <button class="reset-button" type="button" id="resetButton" aria-label="Restablecer selección">Restablecer</button>
+        </div>
+      </aside>
+    </section>
+
+    <section class="terms" aria-label="Condiciones del presupuesto">
+      <div class="term">
+        <strong>Importes transparentes</strong>
+        <span>La implementación se abona una sola vez. La mensualidad corresponde a los servicios activos.</span>
+      </div>
+      <div class="term">
+        <strong>Presupuesto configurable</strong>
+        <span>Cada opción se puede añadir o quitar antes de confirmar el alcance definitivo del proyecto.</span>
+      </div>
+      <div class="term">
+        <strong>Impuestos</strong>
+        <span>Los precios mostrados no incluyen IVA. Cualquier trabajo fuera del alcance se presupuestará aparte.</span>
+      </div>
+    </section>
+
+    <footer>
+      <strong>Propuesta preparada para Climatron</strong>
+      <span>Documento interactivo · Los importes cambian según la selección realizada.</span>
+    </footer>
+  </main>
+
+  <script>
+    (() => {
+      const formatter = new Intl.NumberFormat('es-ES', {
+        style: 'currency',
+        currency: 'EUR',
+        maximumFractionDigits: 0
+      });
+
+      const inputs = [...document.querySelectorAll('input[name="service"]')];
+      const setupTotal = document.getElementById('setupTotal');
+      const monthlyTotal = document.getElementById('monthlyTotal');
+      const firstPayment = document.getElementById('firstPayment');
+      const annualTotal = document.getElementById('annualTotal');
+      const selectedSummary = document.getElementById('selectedSummary');
+      const selectedCount = document.getElementById('selectedCount');
+      const resetButton = document.getElementById('resetButton');
+
+      function euro(value) {
+        return formatter.format(value).replace(/\u00a0/g, ' ');
+      }
+
+      function updateBudget() {
+        const selected = inputs.filter(input => input.checked);
+        const setup = selected.reduce((sum, input) => sum + Number(input.dataset.setup), 0);
+        const monthly = selected.reduce((sum, input) => sum + Number(input.dataset.monthly), 0);
+
+        inputs.forEach(input => {
+          input.closest('.service-card').classList.toggle('active', input.checked);
+        });
+
+        setupTotal.textContent = euro(setup);
+        monthlyTotal.innerHTML = `${euro(monthly)} <small>/ mes</small>`;
+        firstPayment.textContent = euro(setup + monthly);
+        annualTotal.textContent = euro(setup + (monthly * 12));
+        selectedCount.textContent = `${selected.length} ${selected.length === 1 ? 'seleccionado' : 'seleccionados'}`;
+
+        if (!selected.length) {
+          selectedSummary.innerHTML = '<span class="empty-state">No hay servicios seleccionados.</span>';
+          return;
+        }
+
+        selectedSummary.innerHTML = `<ul>${selected.map(input => {
+          const name = input.closest('.service-card').dataset.name;
+          return `<li>${name}</li>`;
+        }).join('')}</ul>`;
+      }
+
+      inputs.forEach(input => input.addEventListener('change', updateBudget));
+
+      resetButton.addEventListener('click', () => {
+        inputs.forEach((input, index) => { input.checked = index === 0; });
+        updateBudget();
+        document.querySelector('.panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+
+      document.querySelectorAll('[data-action="print"]').forEach(button => {
+        button.addEventListener('click', () => window.print());
+      });
+
+      document.getElementById('proposalDate').textContent = new Intl.DateTimeFormat('es-ES', {
+        day: '2-digit', month: 'long', year: 'numeric'
+      }).format(new Date());
+
+      updateBudget();
+    })();
+  </script>
+</body>
+</html>
